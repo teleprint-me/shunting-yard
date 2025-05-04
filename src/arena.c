@@ -18,6 +18,8 @@
 #include <malloc.h>
 #include <stdalign.h>
 
+// --- Memory Alignment ---
+
 void* memory_aligned_alloc(size_t size, size_t alignment) {
     if (alignment < sizeof(void*)) {
         alignment = sizeof(void*);
@@ -34,6 +36,8 @@ void* memory_aligned_alloc(size_t size, size_t alignment) {
 
     return address;
 }
+
+// --- Linear Allocator ---
 
 // Public methods
 Arena* arena_create(size_t capacity) {

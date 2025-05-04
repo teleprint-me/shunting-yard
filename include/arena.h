@@ -24,6 +24,8 @@
 
 #define LINEAR_MEMORY_ALIGNMENT 8
 
+// --- Memory Alignment ---
+
 /**
  * @brief Computes x modulo y, optimized for y being a power of two.
  *
@@ -106,6 +108,8 @@ static inline uintptr_t memory_aligned_size(uintptr_t x, uintptr_t alignment) {
  * @return A pointer to the allocated memory, or NULL if allocation fails.
  */
 void* memory_aligned_alloc(size_t size, size_t alignment);
+
+// --- Linear Allocator ---
 
 /**
  * @struct Arena
