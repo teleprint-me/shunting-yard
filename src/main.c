@@ -1,8 +1,11 @@
 /**
- * @file examples/rpn.c
+ * Copyright © 2025 Austin Berrio
+ *
+ * @file src/main.c
  * @brief The shunting yard algorithm completely from scratch in pure C.
- * @ref https://mathcenter.oxford.emory.edu/site/cs171/shuntingYardAlgorithm/
+ *
  * @ref https://en.wikipedia.org/wiki/Shunting_yard_algorithm
+ * @ref https://mathcenter.oxford.emory.edu/site/cs171/shuntingYardAlgorithm/
  */
 
 #include "lexer.h"
