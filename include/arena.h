@@ -22,9 +22,9 @@
 #include <stdalign.h>
 #include <malloc.h>
 
-#define LINEAR_MEMORY_ALIGNMENT 8
-
 // --- Memory Alignment ---
+
+#define LINEAR_MEMORY_ALIGNMENT 8
 
 /**
  * @brief Computes x modulo y, optimized for y being a power of two.
