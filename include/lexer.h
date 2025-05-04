@@ -2,7 +2,7 @@
  * Copyright © 2025 Austin Berrio
  *
  * @file include/lexer.h
- * @brief API for the Lexical Analyzer.
+ * @brief Lexical Analyzer.
  */
 
 #ifndef LEXER_H

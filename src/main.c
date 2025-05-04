@@ -24,7 +24,7 @@ int main(void) {
     TokenList* operator_stack = token_list_create();
 
     for (size_t i = 0; i < infix->count; i++) {
-        Token* symbol = infix->tokens[i];
+        Token* symbol = token_clone(infix->tokens[i]);
 
         if (token_is_number(symbol)) {
             token_list_push(output_queue, symbol);
@@ -64,6 +64,7 @@ int main(void) {
             }
         } else {
             /// @todo handle conversion error
+            token_free(symbol);
         }
     }
 
