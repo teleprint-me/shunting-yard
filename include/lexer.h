@@ -3,6 +3,7 @@
  *
  * @file include/lexer.h
  * @brief Lexical Analyzer.
+ * @warning If you pop it, you own it. If you push it, you clone it. If you free it, you kill it.
  */
 
 #ifndef LEXER_H
@@ -56,6 +57,7 @@ Token* token_create_group(const char* lexeme);
 Token* token_clone(const Token* token);
 bool token_is_number(const Token* token);
 bool token_is_operator(const Token* token);
+bool token_is_group(const Token* token);
 int token_precendence(const Token* token);
 Associate token_association(const Token* token);
 void token_dump(const Token* token);

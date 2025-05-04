@@ -22,7 +22,6 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 # Library sources (for now just arena + lexer)
 add_library(shunting-yard
-    src/arena.c
     src/lexer.c
 )
 

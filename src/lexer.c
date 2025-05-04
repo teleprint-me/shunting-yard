@@ -57,6 +57,7 @@ Token* token_create(const char* lexeme, const size_t size) {
     }
 
     token->size = strlen(token->lexeme);
+    token->type = TOKEN_UNKNOWN;
     return token;
 }
 
@@ -130,7 +131,13 @@ Token* token_clone(const Token* token) {
         return NULL;
     }
 
-    return token_create(token->lexeme, token->size);
+    Token* clone = token_create(token->lexeme, token->size);
+    if (!clone) {
+        return NULL;
+    }
+
+    clone->type = token->type;
+    return clone;
 }
 
 bool token_is_number(const Token* token) {
@@ -157,6 +164,20 @@ bool token_is_operator(const Token* token) {
         case TOKEN_STAR:
         case TOKEN_SLASH:
         case TOKEN_MOD:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool token_is_group(const Token* token) {
+    if (!token) {
+        return false;
+    }
+
+    switch (token->type) {
+        case TOKEN_LEFT_PAREN:
+        case TOKEN_RIGHT_PAREN:
             return true;
         default:
             return false;
@@ -195,11 +216,10 @@ void token_dump(const Token* token) {
 
 void token_free(Token* token) {
     if (token) {
-        assert(token->lexeme != (void*) 0xDEADC0DE && "Double free detected!\n");
         if (token->lexeme) {
             free(token->lexeme);
+            token->lexeme = NULL;
         }
-        token->lexeme = (void*) 0xDEADC0DE;
         free(token);
     }
 }
@@ -228,7 +248,7 @@ bool token_list_push(TokenList* list, Token* token) {
         return false;
     }
 
-    if (list->count == list->capacity) {
+    if (list->count >= list->capacity) {
         size_t capacity = list->capacity * 2;
         Token** temp = realloc(list->tokens, sizeof(Token*) * capacity);
         if (!temp) {
@@ -238,7 +258,7 @@ bool token_list_push(TokenList* list, Token* token) {
         list->capacity = capacity;
     }
 
-    list->tokens[list->count++] = token;
+    list->tokens[list->count++] = token_clone(token);
     return true;
 }
 
@@ -253,9 +273,9 @@ Token* token_list_pop(TokenList* list) {
     }
 
     Token* clone = token_clone(token);
-    token_free(token);
     list->tokens[list->count - 1] = NULL;
     list->count--;
+    token_free(token);
     return clone;
 }
 
@@ -279,7 +299,6 @@ Token* token_list_pop_index(TokenList* list, int64_t index) {
 
     list->tokens[(size_t) index] = NULL;
     Token* clone = token_clone(token);
-    token_free(token);
 
     // Shift elements left
     list->count--;
@@ -287,6 +306,7 @@ Token* token_list_pop_index(TokenList* list, int64_t index) {
         list->tokens[i] = list->tokens[i + 1];
     }
 
+    token_free(token);
     return clone;
 }
 
@@ -357,6 +377,7 @@ TokenList* tokenizer(const char* expression) {
             return NULL;
         }
         expression += token->size; // advance the stream
+        token_free(token);
     }
 
     return list;
