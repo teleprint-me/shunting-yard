@@ -49,31 +49,6 @@ static inline bool memory_is_power_of_two(uintptr_t x) {
 }
 
 /**
- * @brief Determines if x is aligned to a given alignment.
- *
- * @param x The address or value to check.
- * @param alignment The alignment boundary (must be a power of two).
- * @return true if x is aligned to alignment, false otherwise.
- */
-static inline bool memory_is_aligned(uintptr_t x, uintptr_t alignment) {
-    assert(memory_is_power_of_two(alignment));
-    return memory_bitwise_offset(x, alignment) == 0;
-}
-
-/**
- * @brief Rounds up an address to the next multiple of alignment.
- *
- * @param address The starting address.
- * @param alignment The alignment boundary (must be a power of two).
- * @return The next address that is aligned to the specified boundary.
- */
-static inline uintptr_t memory_next_aligned_address(uintptr_t address, uintptr_t alignment) {
-    assert(memory_is_power_of_two(alignment));
-    uintptr_t offset = memory_bitwise_offset(address, alignment);
-    return (offset != 0) ? address + alignment - offset : address;
-}
-
-/**
  * @brief Computes the number of bytes needed to pad address up to alignment.
  *
  * @param address The current address.
@@ -84,18 +59,6 @@ static inline size_t memory_padding_needed(uintptr_t address, size_t alignment) 
     assert(memory_is_power_of_two(alignment));
     size_t offset = memory_bitwise_offset(address, alignment);
     return (offset != 0) ? alignment - offset : 0;
-}
-
-/**
- * @brief Computes the size of x rounded up to the nearest multiple of alignment.
- *
- * @param x The size (or address) to be rounded up.
- * @param alignment The alignment boundary (must be a power of two).
- * @return The size rounded up to the next multiple of alignment.
- */
-static inline uintptr_t memory_aligned_size(uintptr_t x, uintptr_t alignment) {
-    assert(memory_is_power_of_two(alignment));
-    return (x + alignment - 1) & ~(alignment - 1);
 }
 
 /**
