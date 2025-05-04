@@ -80,6 +80,7 @@
     "cstdlib": "c",
     "vector": "c",
     "atomic": "c",
-    "algorithm": "c"
+    "algorithm": "c",
+    "string": "c"
   }
 }
