@@ -1,0 +1,271 @@
+/**
+ * Copyright © 2025 Austin Berrio
+ *
+ * @file include/lexer.h
+ * @brief A Lexical Analyzer.
+ */
+
+#include <stdlib.h>
+#include <assert.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdio.h>
+
+#include "lexer/token.h"
+
+// --- Char Types ---
+
+bool isop(const char s) {
+    switch (s) {
+        case '+': // addition
+        case '-': // subtraction
+        case '*': // multiplication
+        case '/': // division
+        case '%': // modulus
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool isgroup(const char s) {
+    switch (s) {
+        case '(':
+        case ')':
+            return true;
+        default:
+            return false;
+    }
+}
+
+// --- Token Precendence ---
+
+int token_precedence(const Token* token) {
+    if (!token) {
+        return -1; // error
+    }
+
+    switch (token->type) {
+        case TOKEN_PLUS:
+        case TOKEN_MINUS:
+            return 1;
+        case TOKEN_STAR:
+        case TOKEN_SLASH:
+        case TOKEN_MOD:
+            return 2;
+        default:
+            return 0; // none
+    }
+}
+
+// --- Token Operations ---
+
+Token* token_create(const char* lexeme, const size_t size) {
+    if (!lexeme) {
+        return NULL;
+    }
+
+    Token* token = malloc(sizeof(Token));
+    if (!token) {
+        return NULL;
+    }
+
+    token->lexeme = strndup(lexeme, size);
+    if (!token->lexeme) {
+        free(token);
+        return NULL;
+    }
+
+    token->size = strlen(token->lexeme);
+    token->type = TOKEN_UNKNOWN;
+    return token;
+}
+
+Token* token_create_number(const char* lexeme) {
+    size_t span = 0;
+    const char* start = lexeme;
+    while (*lexeme && isdigit(*lexeme)) {
+        span++;
+        lexeme++;
+    }
+
+    Token* token = token_create(start, span);
+    if (!token) {
+        return NULL;
+    }
+
+    token->kind = KIND_NUMBER;
+    token->type = TOKEN_INTEGER;
+    token->association = ASSOCIATE_NONE;
+    token->precedence = -1;
+    return token;
+}
+
+Token* token_create_operator(const char* lexeme) {
+    if (!isop(*lexeme)) {
+        return NULL;
+    }
+
+    Token* token = token_create(lexeme, 1);
+    if (!token) {
+        return NULL;
+    }
+
+    if (*lexeme == '+') {
+        token->type = TOKEN_PLUS;
+    } else if (*lexeme == '-') {
+        token->type = TOKEN_MINUS;
+    } else if (*lexeme == '*') {
+        token->type = TOKEN_STAR;
+    } else if (*lexeme == '/') {
+        token->type = TOKEN_SLASH;
+    } else if (*lexeme == '%') {
+        token->type = TOKEN_MOD;
+    } else {
+        token->type = TOKEN_UNKNOWN;
+    }
+
+    token->kind = KIND_OPERATOR;
+    token->association = ASSOCIATE_LEFT;
+    token->precedence = token_precedence(token);
+    return token;
+}
+
+Token* token_create_group(const char* lexeme) {
+    if (!isgroup(*lexeme)) {
+        return NULL;
+    }
+
+    Token* token = token_create(lexeme, 1);
+    if (!token) {
+        return NULL;
+    }
+
+    if (*lexeme == '(') {
+        token->type = TOKEN_LEFT_PAREN;
+    } else if (*lexeme == ')') {
+        token->type = TOKEN_RIGHT_PAREN;
+    } else {
+        token->type = TOKEN_UNKNOWN;
+    }
+
+    token->kind = KIND_GROUP;
+    token->association = ASSOCIATE_NONE;
+    token->precedence = -1;
+    return token;
+}
+
+Token* token_clone(const Token* token) {
+    if (!token) {
+        return NULL;
+    }
+
+    Token* clone = token_create(token->lexeme, token->size);
+    if (!clone) {
+        return NULL;
+    }
+
+    clone->type = token->type;
+    clone->kind = token->kind;
+    clone->association = token->association;
+    clone->precedence = token->precedence;
+    return clone;
+}
+
+bool token_is_number(const Token* token) {
+    if (!token) {
+        return false;
+    }
+
+    switch (token->type) {
+        case TOKEN_INTEGER:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool token_is_operator(const Token* token) {
+    if (!token) {
+        return false;
+    }
+
+    switch (token->type) {
+        case TOKEN_PLUS:
+        case TOKEN_MINUS:
+        case TOKEN_STAR:
+        case TOKEN_SLASH:
+        case TOKEN_MOD:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool token_is_group(const Token* token) {
+    if (!token) {
+        return false;
+    }
+
+    switch (token->type) {
+        case TOKEN_LEFT_PAREN:
+        case TOKEN_RIGHT_PAREN:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool token_is_kind(const Token* token, TokenKind kind) {
+    return token && token->kind == kind;
+}
+
+bool token_is_type(const Token* token, TokenType type) {
+    return token && token->type == type;
+}
+
+bool token_is_left_paren(const Token* token) {
+    return token_is_type(token, TOKEN_LEFT_PAREN);
+}
+
+bool token_is_right_paren(const Token* token) {
+    return token_is_type(token, TOKEN_RIGHT_PAREN);
+}
+
+bool token_is_associative(const Token* token, Associate association) {
+    return token && token->association == association;
+}
+
+bool token_is_left_assoc(const Token* token) {
+    return token_is_associative(token, ASSOCIATE_LEFT);
+}
+
+bool token_is_right_assoc(const Token* token) {
+    return token_is_associative(token, ASSOCIATE_RIGHT);
+}
+
+bool token_is_none_assoc(const Token* token) {
+    return token_is_associative(token, ASSOCIATE_NONE);
+}
+
+void token_dump(const Token* token) {
+    printf(
+        "[Token] lexeme='%s', size=%zu, type=%d, kind=%d, assoc=%d, prec=%d\n",
+        token->lexeme,
+        token->size,
+        token->type,
+        token->kind,
+        token->association,
+        token->precedence
+    );
+}
+
+void token_free(Token* token) {
+    if (token) {
+        if (token->lexeme) {
+            free(token->lexeme);
+            token->lexeme = NULL;
+        }
+        free(token);
+    }
+}
