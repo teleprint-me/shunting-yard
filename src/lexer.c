@@ -74,7 +74,10 @@ Token* token_create_number(const char* lexeme) {
         return NULL;
     }
 
+    token->kind = KIND_NUMBER;
     token->type = TOKEN_INTEGER;
+    token->association = ASSOCIATE_NONE;
+    token->precedence = -1;
     return token;
 }
 
@@ -102,6 +105,9 @@ Token* token_create_operator(const char* lexeme) {
         token->type = TOKEN_UNKNOWN;
     }
 
+    token->kind = KIND_OPERATOR;
+    token->association = ASSOCIATE_LEFT;
+    token->precedence = token_precedence(token);
     return token;
 }
 
@@ -123,6 +129,9 @@ Token* token_create_group(const char* lexeme) {
         token->type = TOKEN_UNKNOWN;
     }
 
+    token->kind = KIND_GROUP;
+    token->association = ASSOCIATE_NONE;
+    token->precedence = -1;
     return token;
 }
 
@@ -137,7 +146,28 @@ Token* token_clone(const Token* token) {
     }
 
     clone->type = token->type;
+    clone->kind = token->kind;
+    clone->association = token->association;
+    clone->precedence = token->precedence;
     return clone;
+}
+
+int token_precedence(const Token* token) {
+    if (!token) {
+        return -1;
+    }
+
+    switch (token->type) {
+        case TOKEN_PLUS:
+        case TOKEN_MINUS:
+            return 1;
+        case TOKEN_STAR:
+        case TOKEN_SLASH:
+        case TOKEN_MOD:
+            return 2;
+        default:
+            return -1;
+    }
 }
 
 bool token_is_number(const Token* token) {
@@ -184,34 +214,48 @@ bool token_is_group(const Token* token) {
     }
 }
 
-int token_precendence(const Token* token) {
-    if (!token) {
-        return -1;
-    }
-
-    switch (token->type) {
-        case TOKEN_PLUS:
-        case TOKEN_MINUS:
-            return 1;
-        case TOKEN_STAR:
-        case TOKEN_SLASH:
-        case TOKEN_MOD:
-            return 2;
-        default:
-            return -1;
-    }
+bool token_is_kind(const Token* token, TokenKind kind) {
+    return token && token->kind == kind;
 }
 
-Associate token_association(const Token* token) {
-    if (!token) {
-        return ASSOCIATE_INVALID;
-    }
+bool token_is_type(const Token* token, TokenType type) {
+    return token && token->type == type;
+}
 
-    return ASSOCIATE_LEFT;
+bool token_is_left_paren(const Token* token) {
+    return token_is_type(token, TOKEN_LEFT_PAREN);
+}
+
+bool token_is_right_paren(const Token* token) {
+    return token_is_type(token, TOKEN_RIGHT_PAREN);
+}
+
+bool token_is_associative(const Token* token, Associate association) {
+    return token && token->association == association;
+}
+
+bool token_is_left_assoc(const Token* token) {
+    return token_is_associative(token, ASSOCIATE_LEFT);
+}
+
+bool token_is_right_assoc(const Token* token) {
+    return token_is_associative(token, ASSOCIATE_RIGHT);
+}
+
+bool token_is_none_assoc(const Token* token) {
+    return token_is_associative(token, ASSOCIATE_NONE);
 }
 
 void token_dump(const Token* token) {
-    printf("Token: lexeme='%s', size=%zu, type=%d\n", token->lexeme, token->size, token->type);
+    printf(
+        "[Token] lexeme='%s', size=%zu, type=%d, kind=%d, assoc=%d, prec=%d\n",
+        token->lexeme,
+        token->size,
+        token->type,
+        token->kind,
+        token->association,
+        token->precedence
+    );
 }
 
 void token_free(Token* token) {
@@ -318,6 +362,10 @@ Token* token_list_peek(const TokenList* list) {
     return list->tokens[list->count - 1];
 }
 
+bool token_list_is_empty(const TokenList* list) {
+    return list->count == 0;
+}
+
 void token_list_dump(const TokenList* list) {
     if (!list) {
         return;
@@ -326,11 +374,14 @@ void token_list_dump(const TokenList* list) {
     for (size_t i = 0; i < list->count; i++) {
         Token* token = list->tokens[i];
         printf(
-            "Token: index=%zu, lexeme='%s', size=%zu, type=%d\n",
+            "[TokenList] index=%zu, lexeme='%s', size=%zu, type=%d, kind=%d, assoc=%d, prec=%d\n",
             i,
             token->lexeme,
             token->size,
-            token->type
+            token->type,
+            token->kind,
+            token->association,
+            token->precedence
         );
     }
 }

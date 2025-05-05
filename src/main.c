@@ -24,8 +24,8 @@ int main(void) {
     printf("[DEBUG] [Sample] %s\n", sample);
 
     TokenList* infix = tokenizer(sample);
-    printf("[DEBUG] [Infix]\n");
-    token_list_dump(infix);
+    // printf("[DEBUG] [Infix]\n");
+    // token_list_dump(infix);
 
     TokenList* output_queue = token_list_create();
     TokenList* operator_stack = token_list_create();
@@ -35,22 +35,21 @@ int main(void) {
         if (!symbol) {
             break;
         }
-        printf("[DEBUG] [Symbol] ");
-        token_dump(symbol);
-    
+        // printf("[DEBUG] [Symbol] ");
+        // token_dump(symbol);
+
         if (token_is_number(symbol)) {
             token_list_push(output_queue, symbol); // copy to queue
         } else if (token_is_operator(symbol)) {
             while (true) {
                 Token* op = token_list_peek(operator_stack); // shared reference
-                if (!token_is_operator(op) || op->type == TOKEN_LEFT_PAREN) {
+                if (!token_is_operator(op) || token_is_left_paren(op)) {
                     break;
                 }
 
-                int o1 = token_precendence(symbol);
-                int o2 = token_precendence(op);
-                Associate association = token_association(symbol);
-                if (o2 > o1 || (o2 == o1 && association == ASSOCIATE_LEFT)) {
+                int o1 = token_precedence(symbol);
+                int o2 = token_precedence(op);
+                if (o2 > o1 || (o2 == o1 && token_is_left_assoc(symbol))) {
                     op = token_list_pop(operator_stack); // copy from stack
                     token_list_push(output_queue, op); // copy to queue
                     token_free(op);
@@ -60,12 +59,12 @@ int main(void) {
             }
 
             token_list_push(operator_stack, symbol); // copy to stack
-        } else if (symbol->type == TOKEN_LEFT_PAREN) {
+        } else if (token_is_left_paren(symbol)) {
             token_list_push(operator_stack, symbol); // copy to stack
-        } else if (symbol->type == TOKEN_RIGHT_PAREN) {
+        } else if (token_is_right_paren(symbol)) {
             while (true) {
                 Token* op = token_list_peek(operator_stack); // shared reference
-                if (!op || op->type == TOKEN_LEFT_PAREN || operator_stack->count == 0) {
+                if (!op || token_is_left_paren(op) || token_list_is_empty(operator_stack)) {
                     break;
                 }
                 op = token_list_pop(operator_stack); // copy from stack
@@ -73,12 +72,12 @@ int main(void) {
                 token_free(op); // needs to be freed
             }
             Token* op = token_list_peek(operator_stack);
-            if (op && op->type == TOKEN_LEFT_PAREN) {
+            if (op && token_is_left_paren(op)) {
                 Token* temp = token_list_pop(operator_stack); // copy from stack
                 token_free(temp); // needs to be freed
+            } else {
+                /// @todo handle conversion error
             }
-        } else {
-            /// @todo handle conversion error
         }
     }
 
