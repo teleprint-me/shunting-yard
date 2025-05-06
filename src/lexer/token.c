@@ -1,8 +1,10 @@
 /**
  * Copyright © 2025 Austin Berrio
  *
- * @file include/lexer.h
- * @brief A Lexical Analyzer.
+ * @file src/lexer/token.c
+ * @brief Core Token Analysis and Classification for arithmetic expressions.
+ * @note This API is kept minimal, focused, and extendable.
+ * @warning If you pop it, you own it. If you push it, you clone it. If you free it, you kill it.
  */
 
 #include <stdlib.h>
@@ -40,21 +42,19 @@ bool isgroup(const char s) {
 
 // --- Token Precendence ---
 
-int token_precedence(const Token* token) {
-    if (!token) {
-        return -1; // error
-    }
+Precedent token_precedence(const Token* token) {
+    if (!token) return PRECEDENCE_ERROR;
 
     switch (token->type) {
         case TOKEN_PLUS:
         case TOKEN_MINUS:
-            return 1;
+            return PRECEDENCE_ADDITIVE;
         case TOKEN_STAR:
         case TOKEN_SLASH:
         case TOKEN_MOD:
-            return 2;
+            return PRECEDENCE_MULTIPLICATIVE;
         default:
-            return 0; // none
+            return PRECEDENCE_NONE;
     }
 }
 
@@ -77,15 +77,33 @@ Token* token_create(const char* lexeme, const size_t size) {
     }
 
     token->size = strlen(token->lexeme);
-    token->type = TOKEN_UNKNOWN;
+    token->type = TOKEN_NONE;
+    token->kind = KIND_NONE;
+    token->role = ROLE_NONE;
+    token->association = ASSOCIATE_NONE;
+    token->precedence = PRECEDENCE_NONE;
+
     return token;
 }
 
 Token* token_create_number(const char* lexeme) {
+    if (!lexeme) {
+        return NULL;
+    }
+
     size_t span = 0;
     const char* start = lexeme;
-    while (*lexeme && isdigit(*lexeme)) {
-        span++;
+    bool seen_dot = false;
+
+    while (*lexeme) {
+        if (isdigit(*lexeme)) {
+            span++;
+        } else if (!seen_dot && *lexeme == '.') {
+            seen_dot = true;
+            span++;
+        } else {
+            break;
+        }
         lexeme++;
     }
 
@@ -94,10 +112,12 @@ Token* token_create_number(const char* lexeme) {
         return NULL;
     }
 
-    token->kind = KIND_NUMBER;
-    token->type = TOKEN_INTEGER;
+    token->kind = KIND_LITERAL;
+    token->type = seen_dot ? TOKEN_FLOAT : TOKEN_INTEGER;
     token->association = ASSOCIATE_NONE;
-    token->precedence = -1;
+    token->role = ROLE_NONE;
+    token->precedence = PRECEDENCE_NONE;
+
     return token;
 }
 
