@@ -361,16 +361,101 @@ bool token_is_associate_right(const Token* token) {
     return token_is_associate(token, TOKEN_ASSOCIATE_RIGHT);
 }
 
-// --- Token utilities ---
+// --- Token to String Conversion Functions ---
+
+const char* token_type_to_string(const Token* token) {
+    if (!token) {
+        return "NULL";
+    }
+    switch (token->type) {
+        case TOKEN_TYPE_NONE:
+            return "NONE";
+        case TOKEN_TYPE_INTEGER:
+            return "INTEGER";
+        case TOKEN_TYPE_FLOAT:
+           return "FLOAT";
+        case TOKEN_TYPE_PLUS:
+            return "PLUS";
+        case TOKEN_TYPE_MINUS:
+            return "MINUS";
+        case TOKEN_TYPE_STAR:
+            return "STAR";
+        case TOKEN_TYPE_SLASH:
+            return "SLASH";
+        case TOKEN_TYPE_MOD:
+            return "MOD";
+        case TOKEN_TYPE_LEFT_PAREN:
+            return "LEFT_PAREN";
+        case TOKEN_TYPE_RIGHT_PAREN:
+            return "RIGHT_PAREN";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+const char* token_kind_to_string(const Token* token) {
+    if (!token) {
+        return "NULL";
+    }
+    switch (token->kind) {
+        case TOKEN_KIND_NONE:
+            return "NONE";
+        case TOKEN_KIND_LITERAL:
+            return "LITERAL";
+        case TOKEN_KIND_OPERATOR:
+            return "OPERATOR";
+        case TOKEN_KIND_GROUP:
+            return "GROUP";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+const char* token_associate_to_string(const Token* token) {
+    if (!token) {
+        return "NULL";
+    }
+    switch (token->association) {
+        case TOKEN_ASSOCIATE_NONE:
+            return "NONE";
+        case TOKEN_ASSOCIATE_LEFT:
+            return "LEFT";
+        case TOKEN_ASSOCIATE_RIGHT:
+            return "RIGHT";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+const char* token_precedent_to_string(const Token* token) {
+    if (!token) {
+        return "NULL";
+    }
+    switch (token->precedence) {
+        case TOKEN_PRECEDENT_ERROR:
+            return "ERROR";
+        case TOKEN_PRECEDENT_NONE:
+            return "NONE";
+        case TOKEN_PRECEDENT_ADDITIVE:
+            return "ADDITION";
+        case TOKEN_PRECEDENT_MULTIPLICATIVE:
+            return "MULTIPLICATIVE";
+        default:
+            return "UNKNOWN";
+    }
+}
 
 void token_dump(const Token* token) {
+    if (!token) {
+        return;
+    }
     printf(
-        "[Token] lexeme='%s', size=%zu, type=%d, kind=%d, assoc=%d, prec=%d\n",
+        "[Token] lexeme='%s', size=%zu, type=%s, kind=%s, assoc=%s, prec=%s\n",
         token->lexeme,
         token->size,
-        token->type,
-        token->kind,
-        token->association,
-        token->precedence
+        token_type_to_string(token),
+        token_kind_to_string(token),
+        token_associate_to_string(token),
+        token_precedent_to_string(token)
     );
 }

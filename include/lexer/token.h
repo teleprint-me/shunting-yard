@@ -141,8 +141,12 @@ bool token_is_associate_none(const Token* token);
 bool token_is_associate_left(const Token* token);
 bool token_is_associate_right(const Token* token);
 
-// --- Token Utilities ---
+// --- Token to String Conversion Functions ---
 
+const char* token_type_to_string(const Token* token);
+const char* token_kind_to_string(const Token* token);
+const char* token_associate_to_string(const Token* token);
+const char* token_precedent_to_string(const Token* token);
 void token_dump(const Token* token);
 
 #endif // LEXER_TOKEN_H
