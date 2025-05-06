@@ -43,7 +43,9 @@ bool isgroup(const char s) {
 // --- Token Precendence ---
 
 Precedent token_precedence(const Token* token) {
-    if (!token) return PRECEDENCE_ERROR;
+    if (!token) {
+        return PRECEDENCE_ERROR;
+    }
 
     switch (token->type) {
         case TOKEN_PLUS:
@@ -112,11 +114,11 @@ Token* token_create_number(const char* lexeme) {
         return NULL;
     }
 
-    token->kind = KIND_LITERAL;
-    token->type = seen_dot ? TOKEN_FLOAT : TOKEN_INTEGER;
+    token->precedence = PRECEDENCE_NONE;
     token->association = ASSOCIATE_NONE;
     token->role = ROLE_NONE;
-    token->precedence = PRECEDENCE_NONE;
+    token->kind = KIND_LITERAL;
+    token->type = seen_dot ? TOKEN_FLOAT : TOKEN_INTEGER;
 
     return token;
 }
@@ -142,12 +144,14 @@ Token* token_create_operator(const char* lexeme) {
     } else if (*lexeme == '%') {
         token->type = TOKEN_MOD;
     } else {
-        token->type = TOKEN_UNKNOWN;
+        token->type = TOKEN_NONE;
     }
 
-    token->kind = KIND_OPERATOR;
-    token->association = ASSOCIATE_LEFT;
     token->precedence = token_precedence(token);
+    token->association = ASSOCIATE_LEFT;
+    token->role = ROLE_BINARY;
+    token->kind = KIND_OPERATOR;
+
     return token;
 }
 
@@ -166,12 +170,14 @@ Token* token_create_group(const char* lexeme) {
     } else if (*lexeme == ')') {
         token->type = TOKEN_RIGHT_PAREN;
     } else {
-        token->type = TOKEN_UNKNOWN;
+        token->type = TOKEN_NONE;
     }
 
-    token->kind = KIND_GROUP;
+    token->precedence = PRECEDENCE_NONE;
     token->association = ASSOCIATE_NONE;
-    token->precedence = -1;
+    token->role = ROLE_NONE;
+    token->kind = KIND_GROUP;
+
     return token;
 }
 
@@ -185,10 +191,12 @@ Token* token_clone(const Token* token) {
         return NULL;
     }
 
-    clone->type = token->type;
-    clone->kind = token->kind;
-    clone->association = token->association;
     clone->precedence = token->precedence;
+    clone->association = token->association;
+    clone->role = token->role;
+    clone->kind = token->kind;
+    clone->type = token->type;
+
     return clone;
 }
 

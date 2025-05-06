@@ -4,7 +4,6 @@
  * @file include/lexer/token.h
  * @brief Core Token Analysis and Classification for arithmetic expressions.
  * @note This API is kept minimal, focused, and extendable.
- * @warning If you pop it, you own it. If you push it, you clone it. If you free it, you kill it.
  */
 
 #ifndef LEXER_TOKEN_H
