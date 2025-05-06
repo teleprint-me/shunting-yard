@@ -2,7 +2,12 @@
   "configurations": [
     {
       "name": "Linux",
-      "includePath": ["/usr/include", "/usr/local/include", "${workspaceFolder}/include"],
+      "includePath": [
+        "/usr/include",
+        "/usr/local/include",
+        "${workspaceFolder}/include",
+        "${workspaceFolder}/include/lexer"
+      ],
       "defines": ["_POSIX_C_SOURCE=200112L"],
       "cStandard": "c17",
       "intelliSenseMode": "linux-gcc-x64",
