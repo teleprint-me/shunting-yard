@@ -14,6 +14,16 @@
 #include <stdint.h>
 #include <stddef.h>
 
+// --- Precedence ---
+
+typedef enum Precedent {
+    PRECEDENCE_ERROR = -1, // Malformed token
+    PRECEDENCE_NONE = 0, // No precedence (literals, parens)
+    PRECEDENCE_ADDITIVE = 1, // +, -
+    PRECEDENCE_MULTIPLICATIVE = 2, // *, /, %
+    // More to come: unary, function call, etc.
+} Precedent;
+
 // --- Associativity ---
 
 typedef enum Associate {
@@ -63,7 +73,7 @@ typedef enum TokenType {
 // --- Token object ---
 
 typedef struct Token {
-    int precedence; // Operator precedence (-1 if not applicable)
+    Precedent precedence; // Operator precedence (-1 if malformed)
     Associate association; // Operator associativity
     TokenRole role; // Unary, binary, etc.
     TokenKind kind; // Literal, operator, group
@@ -71,14 +81,6 @@ typedef struct Token {
     size_t size; // Length of lexeme
     char* lexeme; // Null-terminated copy of token string
 } Token;
-
-// --- Token List ---
-
-typedef struct TokenList {
-    size_t count;
-    size_t capacity;
-    Token** tokens;
-} TokenList;
 
 // --- Char classification ---
 
@@ -101,14 +103,26 @@ bool token_is_group(const Token* token);
 
 bool token_is_role(const Token* token, TokenRole role);
 bool token_is_role_none(const Token* token);
+bool token_is_role_unary(const Token* token);
+bool token_is_role_binary(const Token* token);
 
 bool token_is_kind(const Token* token, TokenKind kind);
 bool token_is_kind_none(const Token* token);
+bool token_is_kind_literal(const Token* token);
+bool token_is_kind_operator(const Token* token);
+bool token_is_kind_group(const Token* token);
 
 bool token_is_type(const Token* token, TokenType type);
+bool token_is_type_none(const Token* token);
+bool token_is_type_integer(const Token* token);
+bool token_is_type_float(const Token* token);
+bool token_is_type_plus(const Token* token);
+bool token_is_type_minus(const Token* token);
+bool token_is_type_star(const Token* token);
+bool token_is_type_slash(const Token* token);
+bool token_is_type_mod(const Token* token);
 bool token_is_type_left_paren(const Token* token);
 bool token_is_type_right_paren(const Token* token);
-bool token_is_type_none(const Token* token);
 
 bool token_is_associative(const Token* token, Associate association);
 bool token_is_assoc_left(const Token* token);
@@ -117,7 +131,7 @@ bool token_is_assoc_none(const Token* token);
 
 // --- Token utilities ---
 
-int token_precedence(const Token* token); // Internal logic for precedence table
+Precedent token_precedence(const Token* token); // Internal logic table
 void token_dump(const Token* token);
 void token_free(Token* token);
 
