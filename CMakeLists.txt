@@ -22,7 +22,9 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 # Library sources (for now just arena + lexer)
 add_library(shunting-yard
-    src/lexer.c
+    src/lexer/token.c
+    src/lexer/token_list.c
+    src/lexer/tokenizer.c
 )
 
 target_include_directories(shunting-yard PUBLIC include)
