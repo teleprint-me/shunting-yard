@@ -16,57 +16,57 @@
 // --- Precedence ---
 
 typedef enum Precedent {
-    PRECEDENCE_ERROR = -1, // Malformed token
-    PRECEDENCE_NONE = 0, // No precedence (literals, parens)
-    PRECEDENCE_ADDITIVE = 1, // +, -
-    PRECEDENCE_MULTIPLICATIVE = 2, // *, /, %
+    TOKEN_PRECEDENT_ERROR = -1, // Malformed token
+    TOKEN_PRECEDENT_NONE = 0, // No precedence (literals, parens)
+    TOKEN_PRECEDENT_ADDITIVE = 1, // +, -
+    TOKEN_PRECEDENT_MULTIPLICATIVE = 2, // *, /, %
     // More to come: unary, function call, etc.
 } Precedent;
 
 // --- Associativity ---
 
 typedef enum Associate {
-    ASSOCIATE_NONE,
-    ASSOCIATE_LEFT,
-    ASSOCIATE_RIGHT,
+    TOKEN_ASSOCIATE_NONE,
+    TOKEN_ASSOCIATE_LEFT,
+    TOKEN_ASSOCIATE_RIGHT,
 } Associate;
 
 // --- Role: purpose in expression ---
 
 typedef enum TokenRole {
-    ROLE_NONE,
-    ROLE_UNARY,
-    ROLE_BINARY,
+    TOKEN_ROLE_NONE,
+    TOKEN_ROLE_UNARY,
+    TOKEN_ROLE_BINARY,
 } TokenRole;
 
 // --- Kind: lexical category ---
 
 typedef enum TokenKind {
-    KIND_NONE,
-    KIND_LITERAL,
-    KIND_OPERATOR,
-    KIND_GROUP,
+    TOKEN_KIND_NONE,
+    TOKEN_KIND_LITERAL,
+    TOKEN_KIND_OPERATOR,
+    TOKEN_KIND_GROUP,
 } TokenKind;
 
 // --- Type: concrete token type ---
 
 typedef enum TokenType {
-    TOKEN_NONE,
+    TOKEN_TYPE_NONE,
 
     // Literals
-    TOKEN_INTEGER,
-    TOKEN_FLOAT,
+    TOKEN_TYPE_INTEGER,
+    TOKEN_TYPE_FLOAT,
 
     // Operators
-    TOKEN_PLUS,
-    TOKEN_MINUS,
-    TOKEN_STAR,
-    TOKEN_SLASH,
-    TOKEN_MOD,
+    TOKEN_TYPE_PLUS,
+    TOKEN_TYPE_MINUS,
+    TOKEN_TYPE_STAR,
+    TOKEN_TYPE_SLASH,
+    TOKEN_TYPE_MOD,
 
     // Grouping
-    TOKEN_LEFT_PAREN,
-    TOKEN_RIGHT_PAREN,
+    TOKEN_TYPE_LEFT_PAREN,
+    TOKEN_TYPE_RIGHT_PAREN,
 } TokenType;
 
 // --- Token object ---
@@ -81,35 +81,46 @@ typedef struct Token {
     char* lexeme; // Null-terminated copy of token string
 } Token;
 
-// --- Char classification ---
+// --- ASCII Character Classification ---
 
 bool isop(const char s);
 bool isgroup(const char s);
 
-// --- Token creation ---
+// --- Token Precedent Classification ---
+
+Precedent token_precedence(const Token* token); // Internal logic table
+
+// --- Token Lifecycle Management ---
 
 Token* token_create(const char* lexeme, const size_t size);
 Token* token_create_number(const char* lexeme);
 Token* token_create_operator(const char* lexeme);
 Token* token_create_group(const char* lexeme);
 Token* token_clone(const Token* token); // Deep copy
+void token_free(Token* token);
 
-// --- Token classification ---
+// --- Token Classification ---
 
 bool token_is_number(const Token* token);
 bool token_is_operator(const Token* token);
 bool token_is_group(const Token* token);
+
+// --- Token Role Classification ---
 
 bool token_is_role(const Token* token, TokenRole role);
 bool token_is_role_none(const Token* token);
 bool token_is_role_unary(const Token* token);
 bool token_is_role_binary(const Token* token);
 
+// --- Token Kind Classification ---
+
 bool token_is_kind(const Token* token, TokenKind kind);
 bool token_is_kind_none(const Token* token);
 bool token_is_kind_literal(const Token* token);
 bool token_is_kind_operator(const Token* token);
 bool token_is_kind_group(const Token* token);
+
+// --- Token Type Classification ---
 
 bool token_is_type(const Token* token, TokenType type);
 bool token_is_type_none(const Token* token);
@@ -123,15 +134,15 @@ bool token_is_type_mod(const Token* token);
 bool token_is_type_left_paren(const Token* token);
 bool token_is_type_right_paren(const Token* token);
 
-bool token_is_associative(const Token* token, Associate association);
-bool token_is_assoc_left(const Token* token);
-bool token_is_assoc_right(const Token* token);
-bool token_is_assoc_none(const Token* token);
+// --- Token Associativity Classification ---
 
-// --- Token utilities ---
+bool token_is_associate(const Token* token, Associate association);
+bool token_is_associate_none(const Token* token);
+bool token_is_associate_left(const Token* token);
+bool token_is_associate_right(const Token* token);
 
-Precedent token_precedence(const Token* token); // Internal logic table
+// --- Token Utilities ---
+
 void token_dump(const Token* token);
-void token_free(Token* token);
 
 #endif // LEXER_TOKEN_H

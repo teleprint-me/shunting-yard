@@ -15,7 +15,7 @@
 
 #include "lexer/token.h"
 
-// --- Char Types ---
+// --- ASCII Character Classification ---
 
 bool isop(const char s) {
     switch (s) {
@@ -40,27 +40,27 @@ bool isgroup(const char s) {
     }
 }
 
-// --- Token Precendence ---
+// --- Token Precedent Classification ---
 
 Precedent token_precedence(const Token* token) {
     if (!token) {
-        return PRECEDENCE_ERROR;
+        return TOKEN_PRECEDENT_ERROR;
     }
 
     switch (token->type) {
-        case TOKEN_PLUS:
-        case TOKEN_MINUS:
-            return PRECEDENCE_ADDITIVE;
-        case TOKEN_STAR:
-        case TOKEN_SLASH:
-        case TOKEN_MOD:
-            return PRECEDENCE_MULTIPLICATIVE;
+        case TOKEN_TYPE_PLUS:
+        case TOKEN_TYPE_MINUS:
+            return TOKEN_PRECEDENT_ADDITIVE;
+        case TOKEN_TYPE_STAR:
+        case TOKEN_TYPE_SLASH:
+        case TOKEN_TYPE_MOD:
+            return TOKEN_PRECEDENT_MULTIPLICATIVE;
         default:
-            return PRECEDENCE_NONE;
+            return TOKEN_PRECEDENT_NONE;
     }
 }
 
-// --- Token Operations ---
+// --- Token Lifecycle Management ---
 
 Token* token_create(const char* lexeme, const size_t size) {
     if (!lexeme) {
@@ -79,11 +79,11 @@ Token* token_create(const char* lexeme, const size_t size) {
     }
 
     token->size = strlen(token->lexeme);
-    token->type = TOKEN_NONE;
-    token->kind = KIND_NONE;
-    token->role = ROLE_NONE;
-    token->association = ASSOCIATE_NONE;
-    token->precedence = PRECEDENCE_NONE;
+    token->type = TOKEN_TYPE_NONE;
+    token->kind = TOKEN_KIND_NONE;
+    token->role = TOKEN_ROLE_NONE;
+    token->association = TOKEN_ASSOCIATE_NONE;
+    token->precedence = TOKEN_PRECEDENT_NONE;
 
     return token;
 }
@@ -114,11 +114,11 @@ Token* token_create_number(const char* lexeme) {
         return NULL;
     }
 
-    token->precedence = PRECEDENCE_NONE;
-    token->association = ASSOCIATE_NONE;
-    token->role = ROLE_NONE;
-    token->kind = KIND_LITERAL;
-    token->type = seen_dot ? TOKEN_FLOAT : TOKEN_INTEGER;
+    token->precedence = TOKEN_PRECEDENT_NONE;
+    token->association = TOKEN_ASSOCIATE_NONE;
+    token->role = TOKEN_ROLE_NONE;
+    token->kind = TOKEN_KIND_LITERAL;
+    token->type = seen_dot ? TOKEN_TYPE_FLOAT : TOKEN_TYPE_INTEGER;
 
     return token;
 }
@@ -134,23 +134,23 @@ Token* token_create_operator(const char* lexeme) {
     }
 
     if (*lexeme == '+') {
-        token->type = TOKEN_PLUS;
+        token->type = TOKEN_TYPE_PLUS;
     } else if (*lexeme == '-') {
-        token->type = TOKEN_MINUS;
+        token->type = TOKEN_TYPE_MINUS;
     } else if (*lexeme == '*') {
-        token->type = TOKEN_STAR;
+        token->type = TOKEN_TYPE_STAR;
     } else if (*lexeme == '/') {
-        token->type = TOKEN_SLASH;
+        token->type = TOKEN_TYPE_SLASH;
     } else if (*lexeme == '%') {
-        token->type = TOKEN_MOD;
+        token->type = TOKEN_TYPE_MOD;
     } else {
-        token->type = TOKEN_NONE;
+        token->type = TOKEN_TYPE_NONE;
     }
 
     token->precedence = token_precedence(token);
-    token->association = ASSOCIATE_LEFT;
-    token->role = ROLE_BINARY;
-    token->kind = KIND_OPERATOR;
+    token->association = TOKEN_ASSOCIATE_LEFT;
+    token->role = TOKEN_ROLE_BINARY;
+    token->kind = TOKEN_KIND_OPERATOR;
 
     return token;
 }
@@ -166,17 +166,17 @@ Token* token_create_group(const char* lexeme) {
     }
 
     if (*lexeme == '(') {
-        token->type = TOKEN_LEFT_PAREN;
+        token->type = TOKEN_TYPE_LEFT_PAREN;
     } else if (*lexeme == ')') {
-        token->type = TOKEN_RIGHT_PAREN;
+        token->type = TOKEN_TYPE_RIGHT_PAREN;
     } else {
-        token->type = TOKEN_NONE;
+        token->type = TOKEN_TYPE_NONE;
     }
 
-    token->precedence = PRECEDENCE_NONE;
-    token->association = ASSOCIATE_NONE;
-    token->role = ROLE_NONE;
-    token->kind = KIND_GROUP;
+    token->precedence = TOKEN_PRECEDENT_NONE;
+    token->association = TOKEN_ASSOCIATE_NONE;
+    token->role = TOKEN_ROLE_NONE;
+    token->kind = TOKEN_KIND_GROUP;
 
     return token;
 }
@@ -200,13 +200,26 @@ Token* token_clone(const Token* token) {
     return clone;
 }
 
+void token_free(Token* token) {
+    if (token) {
+        if (token->lexeme) {
+            free(token->lexeme);
+            token->lexeme = NULL;
+        }
+        free(token);
+    }
+}
+
+// --- Token Classification ---
+
 bool token_is_number(const Token* token) {
     if (!token) {
         return false;
     }
 
     switch (token->type) {
-        case TOKEN_INTEGER:
+        case TOKEN_TYPE_INTEGER:
+        case TOKEN_TYPE_FLOAT:
             return true;
         default:
             return false;
@@ -219,11 +232,11 @@ bool token_is_operator(const Token* token) {
     }
 
     switch (token->type) {
-        case TOKEN_PLUS:
-        case TOKEN_MINUS:
-        case TOKEN_STAR:
-        case TOKEN_SLASH:
-        case TOKEN_MOD:
+        case TOKEN_TYPE_PLUS:
+        case TOKEN_TYPE_MINUS:
+        case TOKEN_TYPE_STAR:
+        case TOKEN_TYPE_SLASH:
+        case TOKEN_TYPE_MOD:
             return true;
         default:
             return false;
@@ -236,45 +249,119 @@ bool token_is_group(const Token* token) {
     }
 
     switch (token->type) {
-        case TOKEN_LEFT_PAREN:
-        case TOKEN_RIGHT_PAREN:
+        case TOKEN_TYPE_LEFT_PAREN:
+        case TOKEN_TYPE_RIGHT_PAREN:
             return true;
         default:
             return false;
     }
 }
 
+// --- Token Role Classification ---
+
+bool token_is_role(const Token* token, TokenRole role) {
+    return token && token->role == role;
+}
+
+bool token_is_role_none(const Token* token) {
+    return token_is_role(token, TOKEN_ROLE_NONE);
+}
+
+bool token_is_role_unary(const Token* token) {
+    return token_is_role(token, TOKEN_ROLE_UNARY);
+}
+
+bool token_is_role_binary(const Token* token) {
+    return token_is_role(token, TOKEN_ROLE_BINARY);
+}
+
+// --- Token Kind Classification ---
+
 bool token_is_kind(const Token* token, TokenKind kind) {
     return token && token->kind == kind;
 }
+
+bool token_is_kind_none(const Token* token) {
+    return token_is_kind(token, TOKEN_KIND_NONE);
+}
+
+bool token_is_kind_literal(const Token* token) {
+    return token_is_kind(token, TOKEN_KIND_LITERAL);
+}
+
+bool token_is_kind_operator(const Token* token) {
+    return token_is_kind(token, TOKEN_KIND_OPERATOR);
+}
+
+bool token_is_kind_group(const Token* token) {
+    return token_is_kind(token, TOKEN_KIND_GROUP);
+}
+
+// --- Token Type Classification ---
 
 bool token_is_type(const Token* token, TokenType type) {
     return token && token->type == type;
 }
 
-bool token_is_left_paren(const Token* token) {
-    return token_is_type(token, TOKEN_LEFT_PAREN);
+bool token_is_type_none(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_NONE);
 }
 
-bool token_is_right_paren(const Token* token) {
-    return token_is_type(token, TOKEN_RIGHT_PAREN);
+bool token_is_type_integer(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_INTEGER);
 }
 
-bool token_is_associative(const Token* token, Associate association) {
+bool token_is_type_float(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_FLOAT);
+}
+
+bool token_is_type_plus(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_PLUS);
+}
+
+bool token_is_type_minus(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_MINUS);
+}
+
+bool token_is_type_star(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_STAR);
+}
+
+bool token_is_type_slash(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_SLASH);
+}
+
+bool token_is_type_mod(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_MOD);
+}
+
+bool token_is_type_left_paren(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_LEFT_PAREN);
+}
+
+bool token_is_type_right_paren(const Token* token) {
+    return token_is_type(token, TOKEN_TYPE_RIGHT_PAREN);
+}
+
+// --- Token Associativity Classification ---
+
+bool token_is_associate(const Token* token, Associate association) {
     return token && token->association == association;
 }
 
-bool token_is_left_assoc(const Token* token) {
-    return token_is_associative(token, ASSOCIATE_LEFT);
+bool token_is_associate_none(const Token* token) {
+    return token_is_associate(token, TOKEN_ASSOCIATE_NONE);
 }
 
-bool token_is_right_assoc(const Token* token) {
-    return token_is_associative(token, ASSOCIATE_RIGHT);
+bool token_is_associate_left(const Token* token) {
+    return token_is_associate(token, TOKEN_ASSOCIATE_LEFT);
 }
 
-bool token_is_none_assoc(const Token* token) {
-    return token_is_associative(token, ASSOCIATE_NONE);
+bool token_is_associate_right(const Token* token) {
+    return token_is_associate(token, TOKEN_ASSOCIATE_RIGHT);
 }
+
+// --- Token utilities ---
 
 void token_dump(const Token* token) {
     printf(
@@ -286,14 +373,4 @@ void token_dump(const Token* token) {
         token->association,
         token->precedence
     );
-}
-
-void token_free(Token* token) {
-    if (token) {
-        if (token->lexeme) {
-            free(token->lexeme);
-            token->lexeme = NULL;
-        }
-        free(token);
-    }
 }
