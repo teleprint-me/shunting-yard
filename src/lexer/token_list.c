@@ -150,12 +150,14 @@ void token_list_dump(const TokenList* list) {
     for (size_t i = 0; i < list->count; i++) {
         Token* token = list->tokens[i];
         printf(
-            "[TokenList] index=%zu, lexeme='%s', size=%zu, type=%s, kind=%s, assoc=%s, prec=%s\n",
+            "[TokenList] i=%zu, lexeme='%s', size=%zu, type=%s, kind=%s, role=%s, assoc=%s, "
+            "prec=%s\n",
             i,
             token->lexeme,
             token->size,
             token_type_to_string(token),
             token_kind_to_string(token),
+            token_role_to_string(token),
             token_associate_to_string(token),
             token_precedent_to_string(token)
         );

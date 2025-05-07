@@ -145,6 +145,7 @@ bool token_is_associate_right(const Token* token);
 
 const char* token_type_to_string(const Token* token);
 const char* token_kind_to_string(const Token* token);
+const char* token_role_to_string(const Token* token);
 const char* token_associate_to_string(const Token* token);
 const char* token_precedent_to_string(const Token* token);
 void token_dump(const Token* token);

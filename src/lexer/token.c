@@ -373,7 +373,7 @@ const char* token_type_to_string(const Token* token) {
         case TOKEN_TYPE_INTEGER:
             return "INTEGER";
         case TOKEN_TYPE_FLOAT:
-           return "FLOAT";
+            return "FLOAT";
         case TOKEN_TYPE_PLUS:
             return "PLUS";
         case TOKEN_TYPE_MINUS:
@@ -406,6 +406,23 @@ const char* token_kind_to_string(const Token* token) {
             return "OPERATOR";
         case TOKEN_KIND_GROUP:
             return "GROUP";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+const char* token_role_to_string(const Token* token) {
+    if (!token) {
+        return "NULL";
+    }
+
+    switch (token->role) {
+        case TOKEN_ROLE_NONE:
+            return "NONE";
+        case TOKEN_ROLE_UNARY:
+            return "UNARY";
+        case TOKEN_ROLE_BINARY:
+            return "BINARY";
         default:
             return "UNKNOWN";
     }
@@ -449,12 +466,14 @@ void token_dump(const Token* token) {
     if (!token) {
         return;
     }
+
     printf(
-        "[Token] lexeme='%s', size=%zu, type=%s, kind=%s, assoc=%s, prec=%s\n",
+        "[Token] lexeme='%s', size=%zu, type=%s, kind=%s, role=%s, assoc=%s, prec=%s\n",
         token->lexeme,
         token->size,
         token_type_to_string(token),
         token_kind_to_string(token),
+        token_role_to_string(token),
         token_associate_to_string(token),
         token_precedent_to_string(token)
     );
