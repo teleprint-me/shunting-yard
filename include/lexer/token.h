@@ -20,6 +20,7 @@ typedef enum Precedent {
     TOKEN_PRECEDENT_NONE = 0, // No precedence (literals, parens)
     TOKEN_PRECEDENT_ADDITIVE = 1, // +, -
     TOKEN_PRECEDENT_MULTIPLICATIVE = 2, // *, /, %
+    TOKEN_PRECEDENT_UNARY = 3,
     // More to come: unary, function call, etc.
 } Precedent;
 

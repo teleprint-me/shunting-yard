@@ -457,6 +457,8 @@ const char* token_precedent_to_string(const Token* token) {
             return "ADDITIVE";
         case TOKEN_PRECEDENT_MULTIPLICATIVE:
             return "MULTIPLICATIVE";
+        case TOKEN_PRECEDENT_UNARY:
+            return "UNARY";
         default:
             return "UNKNOWN";
     }
