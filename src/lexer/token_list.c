@@ -48,11 +48,11 @@ void token_list_free(TokenList* list) {
 }
 
 bool token_list_is_empty(const TokenList* list) {
-    return list->count == 0;
+    return list && list->tokens && list->count == 0;
 }
 
 bool token_list_is_full(const TokenList* list) {
-    return list->count >= list->capacity;
+    return list && list->tokens && list->count >= list->capacity;
 }
 
 bool token_list_push(TokenList* list, Token* token) {
@@ -75,7 +75,7 @@ bool token_list_push(TokenList* list, Token* token) {
 }
 
 Token* token_list_pop(TokenList* list) {
-    if (!list || !list->tokens || list->count == 0) {
+    if (!list || !list->tokens || token_list_is_empty(list)) {
         return NULL;
     }
 
@@ -92,7 +92,7 @@ Token* token_list_pop(TokenList* list) {
 }
 
 Token* token_list_pop_index(TokenList* list, int64_t index) {
-    if (!list || !list->tokens || list->count == 0) {
+    if (!list || !list->tokens || token_list_is_empty(list)) {
         return NULL;
     }
 
@@ -123,11 +123,7 @@ Token* token_list_pop_index(TokenList* list, int64_t index) {
 }
 
 const Token* token_list_peek(const TokenList* list) {
-    if (!list || !list->tokens || list->count == 0) {
-        return NULL;
-    }
-
-    if (token_list_is_empty(list)) {
+    if (!list || !list->tokens || token_list_is_empty(list)) {
         return NULL;
     }
 
@@ -135,7 +131,7 @@ const Token* token_list_peek(const TokenList* list) {
 }
 
 const Token* token_list_peek_index(const TokenList* list, const size_t index) {
-    if (!list || !list->tokens || list->count == 0) {
+    if (!list || !list->tokens || token_list_is_empty(list)) {
         return NULL;
     }
 
@@ -147,7 +143,7 @@ const Token* token_list_peek_index(const TokenList* list, const size_t index) {
 }
 
 void token_list_dump(const TokenList* list) {
-    if (!list) {
+    if (!list || !list->tokens || token_list_is_empty(list)) {
         return;
     }
 
