@@ -14,92 +14,31 @@
 #include "lexer/token.h"
 #include "lexer/token_list.h"
 #include "lexer/tokenizer.h"
+#include "parser.h"
 
-// --- Shunting Yard Algorithm ---
-
-TokenList* shunting_yard(const TokenList* infix);
+void shunt_postfix_debug(TokenList* postfix) {
+    printf("[DEBUG] [POSTFIX] ");
+    for (size_t i = 0; i < postfix->count; i++) {
+        Token* t = postfix->tokens[i];
+        printf("%s ", t->lexeme);
+    }
+    printf("\n");
+}
 
 // === Main ===
 
 int main(void) {
-    const char* sample = "(((53 + 2) - (-5. * 4)) / 5) % 100";
-    printf("[DEBUG] [Sample] %s\n", sample);
+    const char* expression = "(((53 + 2) - (-5. * 4)) / 5) % 100";
+    printf("[DEBUG] [INFIX] %s\n", expression);
 
-    TokenList* infix = tokenizer(sample);
-    TokenList* output_queue = token_list_create();
-    TokenList* operator_stack = token_list_create();
+    TokenList* infix = tokenizer(expression);
+    TokenList* postfix = shunt_yard(infix);
 
-    for (size_t i = 0; i < infix->count; i++) {
-        const Token* symbol = token_list_peek_index(infix, i);
-        if (!symbol) {
-            break;
-        }
+    shunt_postfix_debug(postfix);
 
-        // Set unary role if applicable
-        if (token_is_operator(symbol)) {
-            const Token* prev = token_list_peek_index(infix, i - 1);
-            if (i == 0 || token_is_operator(prev) || token_is_type_left_paren(prev)) {
-                ((Token*) symbol)->role = TOKEN_ROLE_UNARY;
-                ((Token*) symbol)->association = TOKEN_ASSOCIATE_RIGHT;
-            }
-        }
-
-        if (token_is_number(symbol)) {
-            token_list_push(output_queue, (Token*) symbol);
-        } else if (token_is_operator(symbol)) {
-            while (true) {
-                const Token* op = token_list_peek(operator_stack);
-                if (!token_is_operator(op) || token_is_type_left_paren(op)) {
-                    break;
-                }
-
-                int o1 = token_precedence(symbol);
-                int o2 = token_precedence(op);
-                if (o2 > o1 || (o2 == o1 && token_is_associate_left(symbol))) {
-                    Token* popped = token_list_pop(operator_stack);
-                    token_list_push(output_queue, popped);
-                    token_free(popped);
-                } else {
-                    break;
-                }
-            }
-            token_list_push(operator_stack, (Token*) symbol);
-        } else if (token_is_type_left_paren(symbol)) {
-            token_list_push(operator_stack, (Token*) symbol);
-        } else if (token_is_type_right_paren(symbol)) {
-            while (true) {
-                const Token* op = token_list_peek(operator_stack);
-                if (!op || token_is_type_left_paren(op) || token_list_is_empty(operator_stack)) {
-                    break;
-                }
-                Token* popped = token_list_pop(operator_stack);
-                token_list_push(output_queue, popped);
-                token_free(popped);
-            }
-            const Token* op = token_list_peek(operator_stack);
-            if (op && token_is_type_left_paren(op)) {
-                Token* temp = token_list_pop(operator_stack);
-                token_free(temp);
-            } else {
-                printf("[ERROR] Mismatched parentheses in column %zu\n", i);
-                goto cleanup;
-            }
-        }
-    }
-
-    Token* op = NULL;
-    while ((op = token_list_pop(operator_stack))) {
-        token_list_push(output_queue, op);
-        token_free(op);
-    }
-
-    printf("[DEBUG] [Queue]\n");
-    token_list_dump(output_queue);
-
-cleanup:
-    token_list_free(operator_stack);
-    token_list_free(output_queue);
+    token_list_free(postfix);
     token_list_free(infix);
+
     return 0;
 }
 

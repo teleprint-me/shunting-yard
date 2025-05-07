@@ -25,6 +25,7 @@ add_library(shunting-yard
     src/lexer/token.c
     src/lexer/token_list.c
     src/lexer/tokenizer.c
+    src/parser.c
 )
 
 target_include_directories(shunting-yard PUBLIC include)
