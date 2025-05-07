@@ -26,20 +26,26 @@ int main(void) {
     printf("[DEBUG] [Sample] %s\n", sample);
 
     TokenList* infix = tokenizer(sample);
-    // printf("[DEBUG] [Infix]\n");
-    // token_list_dump(infix);
-
     TokenList* output_queue = token_list_create();
     TokenList* operator_stack = token_list_create();
 
     for (size_t i = 0; i < infix->count; i++) {
-        const Token* symbol = token_list_peek_index(infix, i); // shared reference
+        const Token* symbol = token_list_peek_index(infix, i);
         if (!symbol) {
             break;
         }
 
+        // Set unary role if applicable
+        if (token_is_operator(symbol)) {
+            const Token* prev = token_list_peek_index(infix, i - 1);
+            if (i == 0 || token_is_operator(prev) || token_is_type_left_paren(prev)) {
+                ((Token*) symbol)->role = TOKEN_ROLE_UNARY;
+                ((Token*) symbol)->association = TOKEN_ASSOCIATE_RIGHT;
+            }
+        }
+
         if (token_is_number(symbol)) {
-            token_list_push(output_queue, (Token*) symbol); // copy to queue
+            token_list_push(output_queue, (Token*) symbol);
         } else if (token_is_operator(symbol)) {
             while (true) {
                 const Token* op = token_list_peek(operator_stack);
@@ -57,7 +63,6 @@ int main(void) {
                     break;
                 }
             }
-
             token_list_push(operator_stack, (Token*) symbol);
         } else if (token_is_type_left_paren(symbol)) {
             token_list_push(operator_stack, (Token*) symbol);
@@ -76,21 +81,22 @@ int main(void) {
                 Token* temp = token_list_pop(operator_stack);
                 token_free(temp);
             } else {
-                // @todo handle conversion error
+                printf("[ERROR] Mismatched parentheses in column %zu\n", i);
+                goto cleanup;
             }
         }
     }
 
-    Token* op = token_list_pop(operator_stack);
-    while (op) {
+    Token* op = NULL;
+    while ((op = token_list_pop(operator_stack))) {
         token_list_push(output_queue, op);
         token_free(op);
-        op = token_list_pop(operator_stack);
     }
 
     printf("[DEBUG] [Queue]\n");
     token_list_dump(output_queue);
 
+cleanup:
     token_list_free(operator_stack);
     token_list_free(output_queue);
     token_list_free(infix);
