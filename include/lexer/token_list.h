@@ -37,7 +37,7 @@ bool token_list_is_empty(const TokenList* list);
 bool token_list_is_full(const TokenList* list);
 
 /// @warning The token is cloned into the list and is owned by the list.
-bool token_list_push(TokenList* list, Token* token);
+bool token_list_push(TokenList* list, const Token* token);
 
 /// @warning The token is removed and freed from the list. A copy of the token is returned.
 Token* token_list_pop(TokenList* list);

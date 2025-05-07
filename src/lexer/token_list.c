@@ -55,7 +55,7 @@ bool token_list_is_full(const TokenList* list) {
     return list && list->tokens && list->count >= list->capacity;
 }
 
-bool token_list_push(TokenList* list, Token* token) {
+bool token_list_push(TokenList* list, const Token* token) {
     if (!list || !list->tokens || !token) {
         return false;
     }
