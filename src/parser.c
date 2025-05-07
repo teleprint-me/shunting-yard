@@ -96,16 +96,14 @@ TokenList* shunt_yard(const TokenList* infix) {
             break; // Out-of-bounds
         }
 
-        if (token_is_operator(symbol)) {
-            shunt_unary(infix, symbol, i);
-        }
-
         if (token_is_number(symbol)) {
             if (!token_list_push(postfix, (Token*) symbol)) {
                 fprintf(stderr, "[ERROR] Failed to push token to output queue.\n");
                 goto error;
             }
         } else if (token_is_operator(symbol)) {
+            shunt_unary(infix, symbol, i);
+
             if (!shunt_precedent(postfix, operators, symbol)) {
                 fprintf(stderr, "[ERROR] Failed during precedence resolution.\n");
                 goto error;
