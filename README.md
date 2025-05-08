@@ -171,13 +171,12 @@ return output queue
 
 ## Notes
 
-- Operator **precedence** and **associativity** are hardcoded:
-
-  - `*`, `/`, `%` > `+`, `-`
-  - All are **left-associative**
-
-- The parser assumes input is tokenized before processing
-- This tool **does not evaluate** the expression—only converts it
+- **Operator precedence and associativity** are hardcoded:
+  - `*`, `/`, `%` have higher precedence than `+`, `-`
+  - All operators are **left-associative** (unary operators are **right-associative**)
+- Input must be **tokenized before parsing**—this project separates lexing from parsing
+- This tool **does not evaluate** expressions (yet); it only converts infix to postfix
+- The parser assumes valid input for now; error handling is minimal and in progress
 
 ## License
 
