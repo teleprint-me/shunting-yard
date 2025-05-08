@@ -25,6 +25,32 @@ void shunt_postfix_debug(TokenList* postfix) {
     printf("\n");
 }
 
+bool shunt_validate(TokenList* postfix) {
+    int64_t depth = 0;
+
+    for (size_t i = 0; i < postfix->count; i++) {
+        const Token* token = token_list_peek_index(postfix, i);
+
+        if (token_is_number(token)) {
+            depth += 1;
+        } else if (token_is_role_unary(token)) {
+            if (depth < 1) {
+                return false; // malformed
+            }
+            // depth unchanged
+        } else if (token_is_role_binary(token)) {
+            if (depth < 2) {
+                return false; // malformed
+            }
+            depth -= 1; // two pops, one push
+        } else {
+            return false; // unknown token
+        }
+    }
+
+    return depth == 1;
+}
+
 // === Main ===
 
 int main(void) {
@@ -34,8 +60,9 @@ int main(void) {
     TokenList* infix = tokenizer(expression);
     TokenList* postfix = shunt_yard(infix);
 
-    shunt_postfix_debug(postfix);
+    printf("[DEBUG] [POSTFIX] [VALID] %s\n", shunt_validate(postfix) ? "YES" : "NO");
 
+    token_list_dump(postfix);
     token_list_free(postfix);
     token_list_free(infix);
 
