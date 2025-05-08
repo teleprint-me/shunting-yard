@@ -176,12 +176,14 @@ return output queue
 
 ## Notes
 
-- **Operator precedence and associativity** are hardcoded:
+- **Operator precedence and associativity** are defined via token metadata (`token.h`), making them
+  extensible and consistent across both the parser and tokenizer.
   - `*`, `/`, `%` have higher precedence than `+`, `-`
-  - All operators are **left-associative** (unary operators are **right-associative**)
+  - Unary operators are **right-associative**
+  - Binary operators are **left-associative**
 - Input must be **tokenized before parsing**—this project separates lexing from parsing
-- This tool **does not evaluate** expressions (yet); it only converts infix to postfix
-- The parser assumes valid input for now; error handling is minimal and in progress
+- This tool **does not evaluate** expressions; it only converts infix to postfix (for now)
+- The parser currently assumes valid input; error handling is minimal and under development
 
 ## License
 
