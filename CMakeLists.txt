@@ -29,7 +29,7 @@ add_library(shunting-yard
 )
 
 target_include_directories(shunting-yard PUBLIC include)
-target_link_libraries(shunting-yard PUBLIC m pcre2-8)
+target_link_libraries(shunting-yard PUBLIC m)
 
 # Main program entry point (optional, useful for CLI testing)
 add_executable(rpn src/main.c)

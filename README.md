@@ -9,7 +9,6 @@ precedence handling, making it ideal for interpreters, compilers, and calculator
 
 - POSIX
 - `libc`
-- `pcre2`
 
 ## Clone and Build
 
