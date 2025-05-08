@@ -1,9 +1,15 @@
 # Shunting-Yard Algorithm
 
+A minimal C implementation for converting infix arithmetic expressions to postfix (RPN).
+
+## Overview
+
 The **Shunting-yard algorithm**, invented by **Edsger Dijkstra**, parses arithmetic expressions
 written in **infix notation** and converts them to **postfix notation** (Reverse Polish Notation, or
-RPN). Postfix form simplifies evaluation by removing the need for parentheses and explicit
-precedence handling, making it ideal for interpreters, compilers, and calculators.
+RPN).
+
+Postfix form simplifies evaluation by removing the need for parentheses and explicit precedence
+handling, making it ideal for calculators, interpreters, and compilers.
 
 ## Dependencies
 
@@ -39,8 +45,8 @@ cmake --build build --config Debug -j$(nproc)
 
 ## Scope
 
-Currently supports basic arithmetic operations only. The design is intentionally minimal to avoid
-complexity creep.
+Currently supports basic arithmetic operations. The design prioritizes clarity and minimalism over
+feature creep.
 
 **Supported operations:**
 
@@ -179,5 +185,5 @@ return output queue
 
 ## License
 
-This project is AGPL-licensed to ensure the code remains freely accessible and modifiable. It’s
-built for educational use and transparency.
+Licensed under the AGPL to guarantee free use, modification, and distribution of the source code.
+Primarily built for educational use, transparency, and future extensibility.
