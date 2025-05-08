@@ -12,4 +12,10 @@
 
 TokenList* shunt_yard(const TokenList* infix);
 
+// --- Utilities ---
+
+bool shunt_is_valid_infix(const TokenList* infix);
+bool shunt_is_valid_postfix(const TokenList* postfix);
+void shunt_debug(const TokenList* postfix);
+
 #endif // SHUNTING_YARD_H

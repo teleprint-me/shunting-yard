@@ -16,51 +16,17 @@
 #include "lexer/tokenizer.h"
 #include "parser.h"
 
-void shunt_postfix_debug(TokenList* postfix) {
-    printf("[DEBUG] [POSTFIX] ");
-    for (size_t i = 0; i < postfix->count; i++) {
-        Token* t = postfix->tokens[i];
-        printf("%s ", t->lexeme);
-    }
-    printf("\n");
-}
-
-bool shunt_validate(TokenList* postfix) {
-    int64_t depth = 0;
-
-    for (size_t i = 0; i < postfix->count; i++) {
-        const Token* token = token_list_peek_index(postfix, i);
-
-        if (token_is_number(token)) {
-            depth += 1;
-        } else if (token_is_role_unary(token)) {
-            if (depth < 1) {
-                return false; // malformed
-            }
-            // depth unchanged
-        } else if (token_is_role_binary(token)) {
-            if (depth < 2) {
-                return false; // malformed
-            }
-            depth -= 1; // two pops, one push
-        } else {
-            return false; // unknown token
-        }
-    }
-
-    return depth == 1;
-}
-
 // === Main ===
 
 int main(void) {
-    const char* expression = "(((53 + 2) - (-5. * 4)) / 5) % 100";
+    const char* expression = "(((53 + 2) - (-5. ** 4)) / 5) % 100";
     printf("[DEBUG] [INFIX] %s\n", expression);
 
     TokenList* infix = tokenizer(expression);
-    TokenList* postfix = shunt_yard(infix);
+    printf("[DEBUG] [INFIX] %s\n", shunt_is_valid_infix(infix) ? "\u2705" : "\u274C");
 
-    printf("[DEBUG] [POSTFIX] [VALID] %s\n", shunt_validate(postfix) ? "YES" : "NO");
+    TokenList* postfix = shunt_yard(infix);
+    printf("[DEBUG] [POSTFIX] %s\n", shunt_is_valid_postfix(postfix) ? "\u2705" : "\u274C");
 
     token_list_dump(postfix);
     token_list_free(postfix);

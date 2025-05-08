@@ -143,3 +143,64 @@ error:
     token_list_free(operators);
     return NULL;
 }
+
+bool shunt_is_valid_infix(const TokenList* infix) {
+    Token* previous = NULL;
+    for (size_t i = 0; i < infix->count; ++i) {
+        Token* current = infix->tokens[i];
+
+        // Check for back-to-back binary operators
+        if (token_is_operator(current) && token_is_operator(previous)) {
+            if (!token_is_type_left_paren(previous) && !token_is_type_right_paren(current)) {
+                // Maybe allow + or - as unary only
+                if (!(token_is_type_plus(current) || token_is_type_minus(current))) {
+                    return false;
+                }
+            }
+        }
+
+        // Check for operator at end
+        if (i == infix->count - 1 && token_is_operator(current)) {
+            return false;
+        }
+
+        previous = current;
+    }
+
+    return true;
+}
+
+bool shunt_is_valid_postfix(const TokenList* postfix) {
+    int64_t depth = 0;
+
+    for (size_t i = 0; i < postfix->count; i++) {
+        const Token* token = token_list_peek_index(postfix, i);
+
+        if (token_is_number(token)) {
+            depth += 1;
+        } else if (token_is_role_unary(token)) {
+            if (depth < 1) {
+                return false; // malformed
+            }
+            // depth unchanged
+        } else if (token_is_role_binary(token)) {
+            if (depth < 2) {
+                return false; // malformed
+            }
+            depth -= 1; // two pops, one push
+        } else {
+            return false; // unknown token
+        }
+    }
+
+    return depth == 1;
+}
+
+void shunt_debug(const TokenList* postfix) {
+    printf("[DEBUG] [POSTFIX] ");
+    for (size_t i = 0; i < postfix->count; i++) {
+        Token* t = postfix->tokens[i];
+        printf("%s ", t->lexeme);
+    }
+    printf("\n");
+}
