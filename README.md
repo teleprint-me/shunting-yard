@@ -1,12 +1,15 @@
 # Shunting-Yard Algorithm
 
-The **Shunting-yard algorithm**, invented by **Edsger Dijkstra**, parses arithmetic expressions written in **infix notation** and converts them to **postfix notation** (Reverse Polish Notation, or RPN). Postfix form simplifies evaluation by removing the need for parentheses and explicit precedence handling, making it ideal for interpreters, compilers, and calculators.
+The **Shunting-yard algorithm**, invented by **Edsger Dijkstra**, parses arithmetic expressions
+written in **infix notation** and converts them to **postfix notation** (Reverse Polish Notation, or
+RPN). Postfix form simplifies evaluation by removing the need for parentheses and explicit
+precedence handling, making it ideal for interpreters, compilers, and calculators.
 
 ## Dependencies
 
-* POSIX
-* `libc`
-* `pcre2`
+- POSIX
+- `libc`
+- `pcre2`
 
 ## Clone and Build
 
@@ -37,20 +40,21 @@ cmake --build build --config Debug -j$(nproc)
 
 ## Scope
 
-Currently supports basic arithmetic operations only. The design is intentionally minimal to avoid complexity creep.
+Currently supports basic arithmetic operations only. The design is intentionally minimal to avoid
+complexity creep.
 
 **Supported operations:**
 
-* Addition (`+`)
-* Subtraction (`-`)
-* Multiplication (`*`)
-* Division (`/`)
-* Modulus (`%`)
+- Addition (`+`)
+- Subtraction (`-`)
+- Multiplication (`*`)
+- Division (`/`)
+- Modulus (`%`)
 
 **Planned features:**
 
-* Variables
-* Functions
+- Variables
+- Functions
 
 ## Core Algorithm
 
@@ -90,59 +94,62 @@ return output queue
 
 ### 1. **Initialize**
 
-* `output_queue`: stores the final postfix expression
-* `operator_stack`: temporarily holds operators and parentheses
+- `output_queue`: stores the final postfix expression
+- `operator_stack`: temporarily holds operators and parentheses
 
 ### 2. **Token Processing**
 
 #### a. **Operands (numbers)**
 
-* Append directly to `output_queue`
+- Append directly to `output_queue`
 
 #### b. **Operators (`+`, `-`, `*`, `/`, `%`)**
 
-* Let `o1` be the current operator
-* While top of stack holds an operator `o2` (not a parenthesis):
+- Let `o1` be the current operator
+- While top of stack holds an operator `o2` (not a parenthesis):
 
-  * If `o2` has higher precedence, or same precedence and `o1` is left-associative:
+  - If `o2` has higher precedence, or same precedence and `o1` is left-associative:
 
-    * Pop `o2` to `output_queue`
-  * Else: break
-* Push `o1` onto `operator_stack`
+    - Pop `o2` to `output_queue`
+
+  - Else: break
+
+- Push `o1` onto `operator_stack`
 
 #### c. **Left Parenthesis `(`**
 
-* Push onto `operator_stack`
+- Push onto `operator_stack`
 
 #### d. **Right Parenthesis `)`**
 
-* Pop operators to `output_queue` until a left parenthesis is found
-* Discard the left parenthesis
-* Raise an error if no match is found
+- Pop operators to `output_queue` until a left parenthesis is found
+- Discard the left parenthesis
+- Raise an error if no match is found
 
 #### e. **Unknown Tokens**
 
-* Handle or reject them explicitly
+- Handle or reject them explicitly
 
 ### 3. **Finalization**
 
-* Pop remaining operators to `output_queue`
-* Raise an error if any unmatched parentheses remain
+- Pop remaining operators to `output_queue`
+- Raise an error if any unmatched parentheses remain
 
 ### 4. **Result**
 
-* `output_queue` now holds the expression in postfix form
+- `output_queue` now holds the expression in postfix form
 
 ## Notes
 
-* Operator **precedence** and **associativity** are hardcoded:
+- Operator **precedence** and **associativity** are hardcoded:
 
-  * `*`, `/`, `%` > `+`, `-`
-  * All are **left-associative**
-* The parser assumes input is tokenized before processing
-* This tool **does not evaluate** the expression—only converts it
+  - `*`, `/`, `%` > `+`, `-`
+  - All are **left-associative**
+
+- The parser assumes input is tokenized before processing
+- This tool **does not evaluate** the expression—only converts it
 
 ## License
 
-This project is AGPL-licensed to ensure the code remains freely accessible and modifiable.
-It’s built for educational use and transparency.
+This project is AGPL-licensed to ensure the code remains freely accessible and modifiable. It’s
+built for educational use and transparency.
