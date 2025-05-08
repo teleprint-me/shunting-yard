@@ -56,6 +56,36 @@ complexity creep.
 - Variables
 - Functions
 
+**Production Rules:**
+
+```ebnf
+expr       → expr + term
+           | expr - term
+           | term
+
+term       → term * factor
+           | term / factor
+           | term % factor
+           | factor
+
+factor     → unary
+           | ( expr )
+
+unary      → - unary
+           | + unary
+           | literal
+
+literal    → INTEGER
+           | FLOAT
+```
+
+**Details:**
+
+- **Unary operators (`+`, `-`)**: Right-associative, allowing constructs like `--5` or `+-3.14`.
+- **Literals**: Both `INTEGER` and `FLOAT` tokens are treated as terminal symbols (recognized by the
+  lexer).
+- **Parentheses**: Used for grouping, preserving correct precedence.
+
 ## Core Algorithm
 
 ```text
